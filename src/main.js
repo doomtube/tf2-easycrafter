@@ -18,8 +18,8 @@ let tf2 = new TeamFortress2(user);
 // Item schema
 const rawItems = require('tf2-static-schema/static/items.json');
 // Access items by defIndex
-const items = {};
-rawItems.forEach(item => { items[item.defindex] = item; });
+const itemSheet = {};
+rawItems.forEach(item => { itemSheet[item.defindex] = item; });
 
 function setupEventListeners() {
 
@@ -70,18 +70,27 @@ function setupEventListeners() {
     tf2.on('backpackLoaded', () => {
         console.log(`Inventory loaded: ${tf2.backpack.length} items found.`);
 
-        //test
+        
+        // Item format check
         if (tf2.backpack.length > 0) {
             console.log(tf2.backpack[0]);
-            console.log(items[tf2.backpack[0].def_index]);
         }
 
+        /*
+        // Dump inventory
+        for (const item of tf2.backpack) {
+            let details = itemSheet[item.def_index]
+            console.log(`${details["defindex"]}:\t ${details["name"]} || ${details["item_name"]}`)
+        }*/
+        
+        
         // Test
         if (tf2.haveGCSession) {
-            const refined = tf2.backpack.filter(item => item.defindex === 5002);
+            const refined = tf2.backpack.filter(item => item.def_index === 5002);
             console.log(`You have ${refined.length} Refined Metal.`);
             if (refined.length > 0) {
                 console.log(refined[0]);
+                console.log(itemSheet[refined[0].def_index]);
             }
         }
     });
