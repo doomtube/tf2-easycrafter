@@ -4,6 +4,8 @@ const prompts = require('prompts');
 const SteamUser = require('steam-user');
 const TeamFortress2 = require('tf2');
 
+const { processInventory } = require('./backpackLogic.js');
+
 // Config
 const programName = "TF2-EasyCrafter"
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -51,6 +53,7 @@ function setupEventListeners() {
         user.gamesPlayed([440]); // "Start" TF2
     });
 
+    // --- Save refreshToken ---
     user.on('refreshToken', (refreshToken) => {
         console.log("Refresh token generated, saving.");
         const data = {
@@ -62,36 +65,19 @@ function setupEventListeners() {
         fs.writeFileSync(TOKEN_PATH, JSON.stringify(data, null, 4), 'utf8');
     });
 
-    // --- TF2 ---
+    // --- TF2 Loaded (info message) ---
     tf2.on('connectedToGC', () => {
         console.log("Connected to TF2 Game Coordinator!");
     });
-    
+
+    // --- Backpack loaded (main functionality) ---
+    let firstLoad = true;
     tf2.on('backpackLoaded', () => {
-        console.log(`Inventory loaded: ${tf2.backpack.length} items found.`);
-
-        
-        // Item format check
-        if (tf2.backpack.length > 0) {
-            console.log(tf2.backpack[0]);
-        }
-
-        /*
-        // Dump inventory
-        for (const item of tf2.backpack) {
-            let details = itemSheet[item.def_index]
-            console.log(`${details["defindex"]}:\t ${details["name"]} || ${details["item_name"]}`)
-        }*/
-        
-        
-        // Test
-        if (tf2.haveGCSession) {
-            const refined = tf2.backpack.filter(item => item.def_index === 5002);
-            console.log(`You have ${refined.length} Refined Metal.`);
-            if (refined.length > 0) {
-                console.log(refined[0]);
-                console.log(itemSheet[refined[0].def_index]);
-            }
+        if (firstLoad) {
+            console.log(`Inventory loaded: ${tf2.backpack.length} items found.`);
+            processInventory(tf2.backpack, itemSheet);
+        } else {
+            console.log("Inventory was just reloaded.");
         }
     });
 
@@ -132,7 +118,8 @@ async function logon() {
             }
             
         } catch (err) {
-            console.warn("Saved token file was corrupt. Ignoring.");
+            console.warn("An error occured while reading saved token. Ignoring.");
+            console.warn(err);
         }
     }
     
