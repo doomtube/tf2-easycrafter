@@ -53,9 +53,20 @@ function setupEventListeners() {
         user.gamesPlayed([440]); // "Start" TF2
     });
 
+    // --- Account Info (Display Name) ---
+    user.on('accountInfo', (name) => {
+        console.log(`You are logged in as: ${name}`);
+    });
+
     // --- Save refreshToken ---
-    user.on('refreshToken', (refreshToken) => {
+    user.on('refreshToken', async (refreshToken) => {
         console.log("Refresh token generated, saving.");
+
+        // If Steam ID not loaded yet
+        if (!user.steamID) {
+            await new Promise( (resolve) => user.once('loggedOn', resolve) );
+        }
+        
         const data = {
             token: refreshToken,
             timestamp: Date.now(),
