@@ -14,8 +14,8 @@ const TOKEN_PATH = path.join(DATA_DIR, 'refresh_token.json');
 
 // Initialization
 if (!fs.existsSync(DATA_DIR)) { fs.mkdirSync(DATA_DIR, { recursive: true }); }
-let user = new SteamUser({ dataDirectory: USER_DATA_DIR });
-let tf2 = new TeamFortress2(user);
+const user = new SteamUser({ dataDirectory: USER_DATA_DIR });
+const tf2 = new TeamFortress2(user);
 
 // Item schema
 const rawItems = require('tf2-static-schema/static/items.json');
@@ -83,10 +83,10 @@ function setupEventListeners() {
 
     // --- Backpack loaded (main functionality) ---
     let firstLoad = true;
-    tf2.on('backpackLoaded', () => {
+    tf2.on('backpackLoaded', async () => {
         if (firstLoad) {
             console.log(`Inventory loaded: ${tf2.backpack.length} items found.`);
-            processInventory(tf2.backpack, itemSheet);
+            await processInventory(tf2, itemSheet);
         } else {
             console.log("Inventory was just reloaded.");
         }
