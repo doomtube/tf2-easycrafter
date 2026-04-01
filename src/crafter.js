@@ -4,16 +4,16 @@ const TIMEOUT_MS = 10000
 
 // Craft metal reference
 const MetalType = {
-    SCRAP: { name: 'scrap', fullName: 'Scrap Metal', def: 5000, pre: null, post: null },
-    RECLAIMED: { name: 'rec', fullName: 'Reclaimed Metal', def: 5001, pre: null, post: null },
-    REFINED: { name: 'ref', fullName: 'Refined Metal', def: 5002, pre: null, post: null }
+    SCRAP:      { name: 'scrap',    fullName: 'Scrap Metal',        def: 5000, next: null, prev: null },
+    RECLAIMED:  { name: 'rec',      fullName: 'Reclaimed Metal',    def: 5001, next: null, prev: null },
+    REFINED:    { name: 'ref',      fullName: 'Refined Metal',      def: 5002, next: null, prev: null }
 };
 
-MetalType.SCRAP.pre = MetalType.RECLAIMED;
-MetalType.RECLAIMED.pre = MetalType.REFINED;
+MetalType.SCRAP.next = MetalType.RECLAIMED;
+MetalType.RECLAIMED.next = MetalType.REFINED;
 
-MetalType.RECLAIMED.post = MetalType.SCRAP;
-MetalType.REFINED.post = MetalType.RECLAIMED;
+MetalType.RECLAIMED.prev = MetalType.SCRAP;
+MetalType.REFINED.prev = MetalType.RECLAIMED;
 
 Object.freeze(MetalType.SCRAP);
 Object.freeze(MetalType.RECLAIMED);
@@ -40,32 +40,30 @@ class Crafter {
             return true;
         }
 
-        if (metalType.pre == null) {
+        if (metalType.next == null) {
             console.log(`Missing ${metalType.name}. Cannot smelt larger metal.`);
             return false;
         } else {
             console.log(`Missing ${metalType.name}. Attempting to smelt larger metal...`);
         }
         
-        const preSatisfied = await this.ensureMetalDown(metalType.pre)
+        const preSatisfied = await this.ensureMetalDown(metalType.next)
         if (!preSatisfied) {
             return false
         }
         
-        console.log(`Smelting 1 ${metalType.pre.name} into 3 ${metalType.name}...`);
-        const success = await this._smeltMetalDown(metalType.pre);
+        console.log(`Smelting 1 ${metalType.next.name} into 3 ${metalType.name}...`);
+        const success = await this.smeltMetalDown(metalType.next);
         if (success) {
             console.log(`${metalType.fullName} obtained!`);
+        } else {
+            console.log(`Failed to obtain ${metalType.fullName}.`);
         }
         return success;
     }
-    
-    _getAll(def) {
-        return this.tf2.backpack.filter(item => item.def_index === def);
-    }
 
-    async _smeltMetalDown(metalType) {
-        if (metalType.post == null) {
+    async smeltMetalDown(metalType) {
+        if (metalType.prev == null) {
             console.log("Attempted to smelt down unsmeltable metal! Aborting...");
             return false;
         }
@@ -75,19 +73,53 @@ class Crafter {
             console.log(`No valid ${metalType.name} to smelt! Aborting...`);
             return false;
         }
-        const itemsToSmelt = [myMetal[0]["id"]];
+        const itemsToSmelt = [myMetal[0].id];
 
+        /*
         console.log(myMetal);
         console.log(itemsToSmelt);
-                
+        */
+        
         console.log(`Sending craft request to smelt ${metalType.name}...`);
         this.tf2.craft(itemsToSmelt);
         const success = await this._waitForCraft();
         if (!success) {
-            console.log("Smelting craft failed! Aborting...");
+            console.log("Smelting craft failed!");
             return false;
         }
         console.log("Smelting craft Completed!");
+        return true;
+    }
+
+    // Craft specified metal into next highest metal
+    async combineMetal(metalType) {
+        if (metalType.next == null) {
+            console.log(`Cannot create larger metal from 3 ${metalType.name}! Aborting...`);
+            return false;
+        }
+        
+        console.log(`Attempting to combine 3 ${metalType.name} into 1 ${metalType.next.name}...`);
+        
+        const myMetal = this._getAll(metalType.def);
+        if (myMetal.length < 3) {
+            console.log(`Insufficient ${metalType.fullName} (have ${myMetal.length}, need 3)! Aborting...`);
+            return false;
+        }
+        const itemsToSmelt = myMetal.slice(0, 3).map(metal => metal.id);
+
+        /*
+        console.log(myMetal);
+        console.log(itemsToSmelt);
+        */
+                
+        console.log(`Sending craft request to combine ${metalType.name}...`);
+        this.tf2.craft(itemsToSmelt);
+        const success = await this._waitForCraft();
+        if (!success) {
+            console.log("Craft failed!");
+            return false;
+        }
+        console.log("Craft Completed!");
         return true;
     }
 
@@ -102,10 +134,19 @@ class Crafter {
 
             this.tf2.once('craftingComplete', (recipe, itemsGained) => {
                 clearTimeout(timeout);
-                console.log(`Craft successful! Gained ${itemsGained.length} items using recipe ${recipe}.`);
-                resolve(true);
+                if (recipe < 0) {
+                    console.log(`Craft Failed (recipe ${recipe}, gained ${itemsGained.length} items).`);
+                    resolve(false);
+                } else {
+                    console.log(`Craft successful! Gained ${itemsGained.length} items using recipe ${recipe}.`);
+                    resolve(true);
+                }
             });
         })
+    }
+
+    _getAll(def) {
+        return this.tf2.backpack.filter(item => item.def_index === def);
     }
 
 }

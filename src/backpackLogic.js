@@ -26,7 +26,12 @@ async function processInventory(tf2, itemSheet) {
     }*/
 
     const myCrafter = new Crafter(tf2);
-    myCrafter.ensureMetalDown(MetalType.SCRAP);
+    await myCrafter.ensureMetalDown(MetalType.SCRAP);
+    await myCrafter.combineMetal(MetalType.SCRAP);
+    //await myCrafter.smeltMetalDown(MetalType.SCRAP);
+    //await myCrafter.smeltMetalDown(MetalType.REFINED);
+    //await myCrafter.smeltMetalDown(MetalType.RECLAIMED);
+    await myCrafter.combineMetal(MetalType.RECLAIMED);
 
     
 }
