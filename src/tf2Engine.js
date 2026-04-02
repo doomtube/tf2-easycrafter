@@ -151,15 +151,22 @@ class TF2Engine extends EventEmitter {
             this._log("Last code was incorrect! Please try again.", LogLevel.WARN);
         }
         
-        const codeOrigin = domain ? `Email (${domain})` : 'Mobile Authenticator';
+        const isEmail = !!domain;
+        const codeOrigin = isEmail ? `Email (${domain})` : 'Mobile App';
         const response = await new Promise((resolve) => {
             this.emit('inputRequired', {
-                message: `Enter Steam Guard code from your ${codeOrigin}: `,
+                message: `Steam Guard Code (${codeOrigin}):`,
                 callback: resolve
             });
         });
+
+        if (response == null) {
+            console.log("Auth cancelled. Exiting...");
+            process.exit(0);
+        }
         
         callback(response.trim());
+        
     }
 
     // Save refreshToken to file

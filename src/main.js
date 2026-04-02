@@ -27,16 +27,11 @@ function setupListeners(engine) {
     engine.on('inputRequired', async (data) => {
         const response = await prompts({
             type: 'text',
-            name: 'code',
+            name: 'input',
             message: data.message
         });
         
-        if (!response.code) {
-            console.log("Cancelled auth. Exiting...");
-            process.exit(0);
-        }
-        
-        data.callback(response.code);
+        data.callback(response["input"]);
     });
     
     engine.on('needCredentials', async (data) => {
