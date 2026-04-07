@@ -1,19 +1,18 @@
 const prompts = require('prompts');
 const { LogLevel } = require('./constants.js');
-const { TF2Engine } = require('./tf2Engine.js')
+const { TF2Engine } = require('./tf2Engine.js');
+const { MetalType } = require('./crafter.js');
+const ConsoleManager = require('./cli.js')
 
 const logColors = {
     [LogLevel.INFO]:    '\x1b[36m', // Cyan
     [LogLevel.WARN]:    '\x1b[33m', // Yellow
     [LogLevel.ERROR]:   '\x1b[31m', // Red
+    [LogLevel.DONE]:    '\x1b[32m', // Green
     [LogLevel.DEBUG]:   '\x1b[90m', // Gray
     dim:                '\x1b[2m',
     reset:              '\x1b[0m'
 };
-
-async function startREPL(engine) {
-    return;
-}
 
 function setupListeners(engine) {
     engine.on('log', ({ message, level, timestamp }) => {
@@ -56,10 +55,9 @@ async function main() {
     await engine.start();
     await readyPromise;
     
-    console.log("Initialization complete.");
-    await startREPL(engine)
-    console.log("Goodbye!");
-    process.exit(0);
+    console.log("Initialization complete. Starting CLI...");
+    const cli = new ConsoleManager(engine);
+    cli.start();
 }
 
 main();

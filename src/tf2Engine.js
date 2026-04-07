@@ -28,6 +28,11 @@ class TF2Engine extends EventEmitter {
         this.crafter = null;
     }
 
+    // Accessors
+    getItemCount() { return this.tf2.backpack.length; }
+    getSlots() { return this.tf2.backpackSlots; }
+
+    // Initialization
     async start() {
         
         this._log("Initializing...");
@@ -51,6 +56,13 @@ class TF2Engine extends EventEmitter {
         
         this._log("Initiating Logon...");
         await this._logon();
+    }
+
+    async logOff() {
+        
+        // TODO: idk how to properly log off
+        this._log("Logging off from Steam (ungracefully)...");
+        
     }
 
     async _logon() {

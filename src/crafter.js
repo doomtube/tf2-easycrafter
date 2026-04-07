@@ -32,6 +32,12 @@ class Crafter {
         this._log = logFunction;
     }
 
+    // --- Accessor Methods ---
+    
+    getMetalCount(metalType) { return this._getAll(metalType.def).length; }
+
+    // --- Crafting Methods ---
+
     // Ensures existence of certain metal only by smelting larger metal.
     // Returns false if unable to ensure.
     async ensureMetalDown(metalType) {
@@ -140,7 +146,7 @@ class Crafter {
                     this._log(`Craft Failed (recipe ${recipe}, gained ${itemsGained.length} items).`, LogLevel.WARN);
                     resolve(false);
                 } else {
-                    this._log(`Craft successful! Gained ${itemsGained.length} items using recipe ${recipe}.`, LogLevel.WARN);
+                    this._log(`Craft successful! Gained ${itemsGained.length} items using recipe ${recipe}.`, LogLevel.DONE);
                     resolve(true);
                 }
             });
