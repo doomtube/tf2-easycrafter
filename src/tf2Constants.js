@@ -14,10 +14,11 @@ Object.freeze(MetalType);
 
 // Slot tokens
 const SlotTokens = {
-    PRIMARY: 5012,
-    SECONDARY: 5013,
-    MELEE: 5014
+    PRIMARY:    { name: 'token_primary',    fullName: 'Slot Token - Primary',   def: 5012 },
+    SECONDARY:  { name: 'token_secondary',  fullName: 'Slot Token - Secondary', def: 5013 },
+    MELEE:      { name: 'token_melee',      fullName: 'Slot Token - Melee',     def: 5012 },
 }
+Object.values(SlotTokens).forEach(Object.freeze);
 Object.freeze(SlotTokens);
 
 // TF2 Classes
