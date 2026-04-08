@@ -1,3 +1,4 @@
+
 const { LogLevel } = require('./constants.js');
 const { MetalType, SlotTokens, TFClasses } = require('./tf2Constants.js')
 
@@ -11,8 +12,19 @@ class Crafter {
     }
 
     // --- Accessor Methods ---
-    
-    getMetalCount(metalType) { return this._getAll(metalType.def).length; }
+
+    getMetalTally() {
+        return this._getCountsFor(Object.values(MetalType));
+    }
+
+    getSlotTokenTally() {
+        return this._getCountsFor(Object.values(SlotTokens), this.tf2.backpack);
+    }
+
+    getClassTokenTally() {
+        const classTokens = Object.values(TFClasses).map((cls) => cls.token);
+        return this._getCountsFor(classTokens, this.tf2.backpack); 
+    }
 
     // --- Crafting Methods ---
 
@@ -129,6 +141,29 @@ class Crafter {
                 }
             });
         })
+    }
+
+    // Generic tally helper (used for getMetalTally and getTokenTally)
+    _getCountsFor(targetItemsArray) {
+        const result = {};
+        const lookup = {};
+    
+        // Build lookup and initialize
+        for (const target of targetItemsArray) {
+            lookup[target.def] = target.name;
+            // Initialize to tuple so we can refer to the original object when looping through the result
+            result[target.name] = [target, 0];
+        }
+    
+        // Single-Pass Tally
+        for (const item of this.tf2.backpack) {
+            const matchName = lookup[item.def_index];
+            if (matchName) {
+                result[matchName][1]++;
+            }
+        }
+    
+        return result;
     }
 
     _getAll(def) {

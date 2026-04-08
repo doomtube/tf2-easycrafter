@@ -20,6 +20,8 @@ function parseMetal(target) {
     return targetMetal;
 }
 
+// TODO: Make command to clear login token
+
 class ConsoleManager {
     constructor(tf2Engine) {
         this.engine = tf2Engine;
@@ -56,6 +58,15 @@ class ConsoleManager {
             },
             
         };
+
+        // Aliases for commands
+        this.aliases = {
+            'h':    'help',
+            'q':    'quit',
+            'exit': 'quit',
+            's':    'status',
+            'inv':  'status'
+        }
     }
 
     // --- INITIALIZATION ---
@@ -81,7 +92,8 @@ class ConsoleManager {
             }
 
             // Command Execution
-            const command = this.commands[commandName];
+            const resolvedName = this.aliases[commandName] || commandName;
+            const command = this.commands[resolvedName];
             if (command) {
                 try {
                     await command.execute(args);
@@ -145,10 +157,6 @@ class ConsoleManager {
         const slots = this.engine.getSlots();
         const percent = Math.round((items / slots) * 100);
 
-        const scrap = this.engine.crafter.getMetalCount(MetalType.SCRAP);
-        const rec = this.engine.crafter.getMetalCount(MetalType.RECLAIMED);
-        const ref = this.engine.crafter.getMetalCount(MetalType.REFINED);
-
         const formatRow = (name, count) => ` ${name} `.padEnd(26, '.') + ` ${count}`;
     
         console.log(' =====================================');
@@ -156,13 +164,46 @@ class ConsoleManager {
         console.log(' =====================================');
         console.log(`   Backpack Usage : ${items} / ${slots} (${percent}%)`);
         console.log('');
+        
         console.log('   --- Crafting Metals ---');
-        console.log(`  ${formatRow(MetalType.SCRAP.fullName, scrap)}`);
-        console.log(`  ${formatRow(MetalType.RECLAIMED.fullName, rec)}`);
-        console.log(`  ${formatRow(MetalType.REFINED.fullName, ref)}`);
+        let foundMetal = false;
+        const metalTally = this.engine.crafter.getMetalTally();
+        for (const [item, count] of Object.values(metalTally)) {
+            if (count > 0) {
+                foundMetal = true;
+                console.log(formatRow(item.displayName, count));
+            }
+        }
+        if (!foundMetal) { console.log(formatRow('None', 0)); }
         console.log('');
+        
+        console.log('   --- Slot Tokens ---');
+        let foundSlot = false;
+        const slotTokenTally = this.engine.crafter.getSlotTokenTally();
+        for (const [item, count] of Object.values(slotTokenTally)) {
+            if (count > 0) {
+                foundSlot = true;
+                console.log(formatRow(item.displayName, count));
+            }
+        }
+        if (!foundSlot) { console.log(formatRow('None', 0)); }
+        console.log('');
+        
+        console.log('   --- Class Tokens ---');
+        let foundClass = false;
+        const classTokenTally = this.engine.crafter.getClassTokenTally();
+        for (const [item, count] of Object.values(classTokenTally)) {
+            if (count > 0) {
+                foundClass = true;
+                console.log(formatRow(item.displayName, count));
+            }
+        }
+        if (!foundClass) { console.log(formatRow('None', 0)); }
+        console.log('');
+        
         console.log(' =====================================');
     }
+
     
     async _shutdown() {
         console.log('[CLI] Shutting down...');
