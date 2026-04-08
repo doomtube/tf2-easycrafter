@@ -1,5 +1,5 @@
 const readline = require('readline');
-const { MetalType } = require('./crafter.js');
+const { MetalType, SlotTokens, TFClasses } = require('./tf2Constants.js');
 
 function parseMetal(target) {
     if (target) {

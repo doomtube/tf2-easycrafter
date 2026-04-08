@@ -7,7 +7,7 @@ const TeamFortress2 = require('tf2');
 const StaticSchema = require('tf2-static-schema/static/items.json');
 
 const { LogLevel } = require('./constants.js');
-const { Crafter } = require('./crafter.js');
+const Crafter = require('./crafter.js');
 
 // Config
 const PROGRAM_NAME = "TF2-EasyCrafter"
@@ -229,4 +229,4 @@ class TF2Engine extends EventEmitter {
     
 }
 
-module.exports = { TF2Engine };
+module.exports = TF2Engine;

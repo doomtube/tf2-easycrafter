@@ -137,6 +137,4 @@ class Crafter {
 
 }
 
-module.exports = { 
-    Crafter
-};
+module.exports = Crafter;
