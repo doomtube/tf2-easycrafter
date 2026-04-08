@@ -6,8 +6,8 @@ const SteamUser = require('steam-user');
 const TeamFortress2 = require('tf2');
 const StaticSchema = require('tf2-static-schema/static/items.json');
 
-const { Crafter, MetalType } = require('./crafter.js');
 const { LogLevel } = require('./constants.js');
+const { Crafter } = require('./crafter.js');
 
 // Config
 const PROGRAM_NAME = "TF2-EasyCrafter"
@@ -45,7 +45,7 @@ class TF2Engine extends EventEmitter {
 
         this.crafter = new Crafter(
             this.tf2,
-            (msg, lvl) => this._log(msg, lvl) // arrow func because it preserves the scope of "this"
+            (msg, lvl) => this._log(msg, lvl) // arrow func to preserve the scope of "this"
         )
 
         // ItemSheet initialization

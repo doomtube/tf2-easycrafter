@@ -1,0 +1,86 @@
+
+// Craft metals
+const MetalType = {
+    SCRAP:      { name: 'scrap',    fullName: 'Scrap Metal',        def: 5000, next: null, prev: null },
+    RECLAIMED:  { name: 'rec',      fullName: 'Reclaimed Metal',    def: 5001, next: null, prev: null },
+    REFINED:    { name: 'ref',      fullName: 'Refined Metal',      def: 5002, next: null, prev: null }
+};
+MetalType.SCRAP.next        = MetalType.RECLAIMED;
+MetalType.RECLAIMED.next    = MetalType.REFINED;
+MetalType.RECLAIMED.prev    = MetalType.SCRAP;
+MetalType.REFINED.prev      = MetalType.RECLAIMED;
+Object.values(MetalType).forEach(Object.freeze);
+Object.freeze(MetalType);
+
+// Slot tokens
+const SlotTokens = {
+    PRIMARY: 5012,
+    SECONDARY: 5013,
+    MELEE: 5014
+}
+Object.freeze(SlotTokens);
+
+// TF2 Classes
+const TFClasses = {
+    SCOUT: {
+        id: 1,
+        name: 'scout',
+        fullName: 'Scout',
+        token: { name: 'token_scout', fullName: 'Class Token - Scout', def: 5003 }
+    },
+    SOLDIER: {
+        id: 2,
+        name: 'soldier',
+        fullName: 'Soldier',
+        token: { name: 'token_soldier', fullName: 'Class Token - Soldier', def: 5005 }
+    },
+    PYRO: {
+        id: 3,
+        name: 'pyro',
+        fullName: 'Pyro',
+        token: { name: 'token_pyro', fullName: 'Class Token - Pyro', def: 5009 }
+    },
+    DEMOMAN: {
+        id: 4,
+        name: 'demo',
+        fullName: 'Demoman',
+        token: { name: 'token_demo', fullName: 'Class Token - Demo', def: 5006 }
+    },
+    HEAVY: {
+        id: 5,
+        name: 'heavy',
+        fullName: 'Heavy',
+        token: { name: 'token_heavy', fullName: 'Class Token - Heavy', def: 5007 }
+    },
+    ENGI: {
+        id: 6,
+        name: 'engi',
+        fullName: 'Engineer',
+        token: { name: 'token_engi', fullName: 'Class Token - Engineer', def: 5011 }
+    },
+    SNIPER: {
+        id: 7,
+        name: 'sniper',
+        fullName: 'Sniper',
+        token: { name: 'token_sniper', fullName: 'Class Token - Sniper', def: 5004 }
+    },
+    MEDIC: {
+        id: 8,
+        name: 'medic',
+        fullName: 'Medic',
+        token: { name: 'token_medic', fullName: 'Class Token - Medic', def: 5008 }
+    },
+    SPY: {
+        id: 9,
+        name: 'spy',
+        fullName: 'Spy',
+        token: { name: 'token_spy', fullName: 'Class Token - Spy', def: 5010 }
+    }
+};
+Object.values(TFClasses).forEach( (tfClass) => {
+    Object.freeze(tfClass.token);
+    Object.freeze(tfClass);
+});
+Object.freeze(TFClasses);
+
+module.exports = { MetalType, SlotTokens, TFClasses }

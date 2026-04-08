@@ -1,26 +1,18 @@
+
 const prompts = require('prompts');
-const { LogLevel } = require('./constants.js');
-const { TF2Engine } = require('./tf2Engine.js');
-const { MetalType } = require('./crafter.js');
+
+const { LogLevel, LogColors } = require('./constants.js');
+const TF2Engine = require('./tf2Engine.js');
 const ConsoleManager = require('./cli.js')
 
-const logColors = {
-    [LogLevel.INFO]:    '\x1b[36m', // Cyan
-    [LogLevel.WARN]:    '\x1b[33m', // Yellow
-    [LogLevel.ERROR]:   '\x1b[31m', // Red
-    [LogLevel.DONE]:    '\x1b[32m', // Green
-    [LogLevel.DEBUG]:   '\x1b[90m', // Gray
-    dim:                '\x1b[2m',
-    reset:              '\x1b[0m'
-};
 
 function setupListeners(engine) {
     engine.on('log', ({ message, level, timestamp }) => {
         // Format: HH:MM:SS
         const time = new Date(timestamp).toLocaleTimeString('en-GB', { hour12: false });
         const displayLevel = level.toUpperCase().padEnd(5)
-        const color = logColors[level] || logColors.reset;
-        console.log(`${logColors.dim}[${time}]:${logColors.reset} ${color}${displayLevel}${logColors.reset} ${logColors.dim}|${logColors.reset} ${message}`);
+        const color = LogColors[level] || LogColors.reset;
+        console.log(`${LogColors.DIM}[${time}]:${LogColors.RESET} ${color}${displayLevel}${LogColors.RESET} ${LogColors.DIM}|${LogColors.RESET} ${message}`);
     });
     
     engine.on('inputRequired', async (data) => {

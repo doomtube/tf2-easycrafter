@@ -1,30 +1,8 @@
 const { LogLevel } = require('./constants.js');
+const { MetalType, SlotTokens, TFClasses } = require('./tf2Constants.js')
 
 // 10 seconds
 const TIMEOUT_MS = 10000
-
-// Craft metal reference
-const MetalType = {
-    SCRAP:      { name: 'scrap',    fullName: 'Scrap Metal',        def: 5000, next: null, prev: null },
-    RECLAIMED:  { name: 'rec',      fullName: 'Reclaimed Metal',    def: 5001, next: null, prev: null },
-    REFINED:    { name: 'ref',      fullName: 'Refined Metal',      def: 5002, next: null, prev: null }
-};
-
-MetalType.SCRAP.next = MetalType.RECLAIMED;
-MetalType.RECLAIMED.next = MetalType.REFINED;
-
-MetalType.RECLAIMED.prev = MetalType.SCRAP;
-MetalType.REFINED.prev = MetalType.RECLAIMED;
-
-Object.freeze(MetalType.SCRAP);
-Object.freeze(MetalType.RECLAIMED);
-Object.freeze(MetalType.REFINED);
-Object.freeze(MetalType);
-
-
-// Token def id's
-const TOKEN_SNIPER = 5004
-const TOKEN_MELEE = 5014
 
 class Crafter {
     constructor(tf2Instance, logFunction) {
@@ -160,6 +138,5 @@ class Crafter {
 }
 
 module.exports = { 
-    Crafter, 
-    MetalType 
+    Crafter
 };
