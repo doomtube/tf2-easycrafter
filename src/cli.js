@@ -107,8 +107,11 @@ class ConsoleManager {
             this._shutdown();
         });
 
+        
         // Startup Dashboard
+        console.log("\n  Welcome!");
         await this.commands['status'].execute();
+        console.log("  Type 'help' for a list of commands.\n");
 
         // Initial prompt
         this.rl.prompt();
@@ -129,11 +132,11 @@ class ConsoleManager {
             }
         } else {
             // General help list
-            console.log('--- Available Commands ---');
+            console.log('\n ---- Available Commands ----');
             for (const [name, data] of Object.entries(this.commands)) {
-                console.log(`${name.padEnd(10)} - ${data.description}`);
+                console.log(`  ${name.padEnd(10)} - ${data.description}`);
             }
-            console.log('--------------------------');
+            console.log('');
         }
     }
 
@@ -148,16 +151,17 @@ class ConsoleManager {
 
         const formatRow = (name, count) => ` ${name} `.padEnd(26, '.') + ` ${count}`;
     
-        console.log('====================================');
-        console.log(' [STATUS] Inventory Overview');
-        console.log('====================================');
-        console.log(` Backpack Usage : ${items} / ${slots} (${percent}%)`);
+        console.log(' =====================================');
+        console.log('   [STATUS] Inventory Overview');
+        console.log(' =====================================');
+        console.log(`   Backpack Usage : ${items} / ${slots} (${percent}%)`);
         console.log('');
-        console.log(' --- Crafting Metals ---');
-        console.log(formatRow(MetalType.SCRAP.fullName, scrap));
-        console.log(formatRow(MetalType.RECLAIMED.fullName, rec));
-        console.log(formatRow(MetalType.REFINED.fullName, ref));
-        console.log('====================================');
+        console.log('   --- Crafting Metals ---');
+        console.log(`  ${formatRow(MetalType.SCRAP.fullName, scrap)}`);
+        console.log(`  ${formatRow(MetalType.RECLAIMED.fullName, rec)}`);
+        console.log(`  ${formatRow(MetalType.REFINED.fullName, ref)}`);
+        console.log('');
+        console.log(' =====================================');
     }
     
     async _shutdown() {
