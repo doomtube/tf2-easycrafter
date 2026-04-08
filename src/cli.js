@@ -59,7 +59,7 @@ class ConsoleManager {
     }
 
     // --- INITIALIZATION ---
-    start() {
+    async start() {
 
         console.log('[CLI] CLI starting...');
 
@@ -106,6 +106,9 @@ class ConsoleManager {
         this.rl.on('close', () => {
             this._shutdown();
         });
+
+        // Startup Dashboard
+        await this.commands['status'].execute();
 
         // Initial prompt
         this.rl.prompt();

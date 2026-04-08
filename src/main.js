@@ -57,7 +57,7 @@ async function main() {
     
     console.log("Initialization complete. Starting CLI...");
     const cli = new ConsoleManager(engine);
-    cli.start();
+    await cli.start();
 }
 
 main();
