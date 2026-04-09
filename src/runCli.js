@@ -38,7 +38,7 @@ function setupListeners(engine) {
     });
 }
 
-async function main() {
+async function runCli() {
     const engine = new TF2Engine();
     
     setupListeners(engine)
@@ -52,4 +52,4 @@ async function main() {
     await cli.start();
 }
 
-main();
+runCli();

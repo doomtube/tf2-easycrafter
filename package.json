@@ -6,7 +6,8 @@
   "author": "Jack Kibort",
   "type": "commonjs",
   "scripts": {
-    "start": "node src/main.js"
+    "start": "npm run cli",
+    "cli": "node src/runCli.js"
   },
   "dependencies": {
     "prompts": "^2.4.2",
