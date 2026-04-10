@@ -125,7 +125,7 @@ class Crafter {
     // useSniper and useMelee false by default since sniper melee best wep to craft objectors
     async smeltJunk(useSniper = false, useMelee = false) {
         // Search backpack filtered by isJunk with parameters specifying useSniper and useMelee
-        
+        // item["craft_material_type"] == "weapon"
     }
 
     // ------ TOKENS ------
@@ -135,12 +135,13 @@ class Crafter {
         //  is of the right craft_class (or allclass) (look at a specific item example to know what fields and values)
 
         // maybe create filter backpack by weapon and class helper method
+        // itemSheet[item.def]["used_by_classes"] is null (KEY NO EXIST, NOT EMPTY LIST) for allclass (including spy)
+        //  or .includes tokenType.schemaClass
     }
 
     async craftSlotToken(tokenType) {
-        // Search backpack (filtered by isJunk (NOT IMPLEMENTED YET)) for which engine.itemSheet[item.def]:
-        //  1. Is a weapon
-        //  2. Is of the right item_slot (look at a specific item example to know what fields and values)
+        // Search backpack (filtered by isJunk (NOT IMPLEMENTED YET)) for which
+        //  engine.itemSheet[item.def]["item_slot"] == tokenType.schemaSlot
     }
 
     // ------ Craft Helpers ------

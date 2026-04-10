@@ -14,9 +14,9 @@ Object.freeze(MetalType);
 
 // Slot tokens
 const SlotTokens = {
-    PRIMARY:    { name: 'token_primary',    fullName: 'Slot Token - Primary',   displayName: 'Primary Token',   def: 5012 },
-    SECONDARY:  { name: 'token_secondary',  fullName: 'Slot Token - Secondary', displayName: 'Secondary Token', def: 5013 },
-    MELEE:      { name: 'token_melee',      fullName: 'Slot Token - Melee',     displayName: 'Melee Token',     def: 5014 },
+    PRIMARY:    { name: 'token_primary',    fullName: 'Slot Token - Primary',   displayName: 'Primary Token',   schemaSlot: "primary",      def: 5012 },
+    SECONDARY:  { name: 'token_secondary',  fullName: 'Slot Token - Secondary', displayName: 'Secondary Token', schemaSlot: "secondary",    def: 5013 },
+    MELEE:      { name: 'token_melee',      fullName: 'Slot Token - Melee',     displayName: 'Melee Token',     schemaSlot: "melee",        def: 5014 }
 }
 Object.values(SlotTokens).forEach(Object.freeze);
 Object.freeze(SlotTokens);
@@ -27,49 +27,49 @@ const TFClasses = {
         id: 1,
         name: 'scout',
         fullName: 'Scout',
-        token: { name: 'token_scout', fullName: 'Class Token - Scout', displayName: 'Scout Token', def: 5003 }
+        token: { name: 'token_scout', fullName: 'Class Token - Scout', displayName: 'Scout Token', schemaClass: 'Scout', def: 5003 }
     },
     SOLDIER: {
         id: 2,
         name: 'soldier',
         fullName: 'Soldier',
-        token: { name: 'token_soldier', fullName: 'Class Token - Soldier', displayName: 'Soldier Token', def: 5005 }
+        token: { name: 'token_soldier', fullName: 'Class Token - Soldier', displayName: 'Soldier Token', schemaClass: 'Soldier', def: 5005 }
     },
     PYRO: {
         id: 3,
         name: 'pyro',
         fullName: 'Pyro',
-        token: { name: 'token_pyro', fullName: 'Class Token - Pyro', displayName: 'Pyro Token', def: 5009 }
+        token: { name: 'token_pyro', fullName: 'Class Token - Pyro', displayName: 'Pyro Token', schemaClass: 'Pyro', def: 5009 }
     },
     DEMOMAN: {
         id: 4,
         name: 'demo',
         fullName: 'Demoman',
-        token: { name: 'token_demo', fullName: 'Class Token - Demo', displayName: 'Demo Token', def: 5006 }
+        token: { name: 'token_demo', fullName: 'Class Token - Demo', displayName: 'Demo Token', schemaClass: 'Demoman', def: 5006 }
     },
     HEAVY: {
         id: 5,
         name: 'heavy',
         fullName: 'Heavy',
-        token: { name: 'token_heavy', fullName: 'Class Token - Heavy', displayName: 'Heavy Token', def: 5007 }
+        token: { name: 'token_heavy', fullName: 'Class Token - Heavy', displayName: 'Heavy Token', schemaClass: 'Heavy', def: 5007 }
     },
     ENGI: {
         id: 6,
         name: 'engi',
         fullName: 'Engineer',
-        token: { name: 'token_engi', fullName: 'Class Token - Engineer', displayName: 'Engi Token', def: 5011 }
+        token: { name: 'token_engi', fullName: 'Class Token - Engineer', displayName: 'Engi Token', schemaClass: 'Engineer', def: 5011 }
     },
     SNIPER: {
         id: 7,
         name: 'sniper',
         fullName: 'Sniper',
-        token: { name: 'token_sniper', fullName: 'Class Token - Sniper', displayName: 'Sniper Token', def: 5004 }
+        token: { name: 'token_sniper', fullName: 'Class Token - Sniper', displayName: 'Sniper Token', schemaClass: 'Sniper', def: 5004 }
     },
     MEDIC: {
         id: 8,
         name: 'medic',
         fullName: 'Medic',
-        token: { name: 'token_medic', fullName: 'Class Token - Medic', displayName: 'Medic Token', def: 5008 }
+        token: { name: 'token_medic', fullName: 'Class Token - Medic', displayName: 'Medic Token', schemaClass: 'Spy', def: 5008 }
     },
     SPY: {
         id: 9,
