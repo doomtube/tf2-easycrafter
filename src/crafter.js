@@ -27,6 +27,8 @@ class Crafter {
     }
 
     // --- Crafting Methods ---
+    
+    // ------ METAL ------
 
     // Ensures existence of certain metal only by smelting larger metal.
     // Returns false if unable to ensure.
@@ -119,6 +121,29 @@ class Crafter {
         this._log("Craft Completed!");
         return true;
     }
+
+    // useSniper and useMelee false by default since sniper melee best wep to craft objectors
+    async smeltJunk(useSniper = false, useMelee = false) {
+        // Search backpack filtered by isJunk with parameters specifying useSniper and useMelee
+        
+    }
+
+    // ------ TOKENS ------
+
+    async craftClassToken(tokenType) {
+        // Search backpack (filtered by isJunk (NOT IMPLEMENTED YET)) for which engine.itemSheet[item.def]:
+        //  is of the right craft_class (or allclass) (look at a specific item example to know what fields and values)
+
+        // maybe create filter backpack by weapon and class helper method
+    }
+
+    async craftSlotToken(tokenType) {
+        // Search backpack (filtered by isJunk (NOT IMPLEMENTED YET)) for which engine.itemSheet[item.def]:
+        //  1. Is a weapon
+        //  2. Is of the right item_slot (look at a specific item example to know what fields and values)
+    }
+
+    // ------ Craft Helpers ------
 
     // Listens for craftingComplete event, default timeout
     _waitForCraft(timeoutMs = TIMEOUT_MS) {
