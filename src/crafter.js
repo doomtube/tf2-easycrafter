@@ -150,8 +150,8 @@ class Crafter {
     // Junk weapons to scrap (default excludes melees and snipers' because they are useful for crafting objectors)
     async makeScrap(keepCleanSpare = true, useEquipped = false, excludeSlots = [ItemEquipSlot.MELEE], excludeClasses = [TFClasses.SNIPER]) {
         const [target1, target2] = this._getBestJunkPair(keepCleanSpare, useEquipped, excludeSlots, excludeClasses);
-        this._log(`SMELT TARGETS:\n${this.itemSheet[target1.def_index].item_name}\n${this.itemSheet[target2.def_index].item_name}`, LogLevel.DEBUG);
-        
+        this._log(`SMELT TARGETS:\n${this.itemSheet[target1.def_index].item_name}\n${this.itemSheet[target2.def_index].item_name}`, LogLevel.INFO);
+        // TODO: Possibly make it confirm with the user before starting the craft
     }
 
     // ------ TOKENS ------
