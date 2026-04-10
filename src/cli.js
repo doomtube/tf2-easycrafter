@@ -37,17 +37,17 @@ class ConsoleManager {
             // Cmdline-related commands
             'help': {
                 description: 'Shows all commands. Provide a command to just show help for that command.\n\t\tUsage: help [command]',
-                execute: async (args) => this._handleHelp(args)
+                execute: async (args) => this._handleHelp(args),
                 category: 'cmd'
             },
             'status': {
-                description: 'Shows current backpack size and metal counts.',
-                execute: async (args) => this._handleStatus(args)
+                description: 'Shows current backpack size and craft item counts.',
+                execute: async (args) => this._handleStatus(args),
                 category: 'cmd'
             },
             'exit': {
                 description: 'Logs off and closes the bot.',
-                execute: async (args) => this._shutdown(args)
+                execute: async (args) => this._shutdown(args),
                 category: 'cmd'
             },
 
@@ -55,19 +55,19 @@ class ConsoleManager {
             
             'forgetme': {
                 description: 'Clears your user login info.',
-                execute: async (args) => this._handleForget(args)
+                execute: async (args) => this._handleForget(args),
                 category: 'steam'
             },
 
             // Craft recipes
             'smelt': {
                 description: 'Crafts a specific metal.\n\t\tUsage: smelt <scrap|rec|ref>',
-                execute: async (args) => this._handleSmelt(args)
+                execute: async (args) => this._handleSmelt(args),
                 category: 'craft'
             },
             'combine': {
                 description: 'Crafts a specific metal.\n\t\tUsage: combine <scrap|rec|ref>',
-                execute: async (args) => this._handleCombine(args)
+                execute: async (args) => this._handleCombine(args),
                 category: 'craft'
             },
             
