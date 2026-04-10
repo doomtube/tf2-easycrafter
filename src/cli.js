@@ -40,19 +40,25 @@ class ConsoleManager {
                 execute: async (args) => this._handleHelp(args),
                 category: 'cmd'
             },
-            'status': {
-                description: 'Shows current backpack size and craft item counts.',
-                execute: async (args) => this._handleStatus(args),
-                category: 'cmd'
-            },
             'exit': {
                 description: 'Logs off and closes the bot.',
                 execute: async (args) => this._shutdown(args),
                 category: 'cmd'
             },
 
-            // Steam commands
-            
+            // Status commands
+            'status': {
+                description: 'Shows current backpack size and craft item counts.',
+                execute: async (args) => this._handleStatus(args),
+                category: 'status'
+            },
+            'junk': {
+                description: 'Prints a summary of scrappable items. A scrappable item is a clean item you already have a dupe of.',
+                execute: async (args) => this._handleJunkSummary(args),
+                category: 'status'
+            },
+
+            // Steam-related commands
             'forgetme': {
                 description: 'Clears your user login info.',
                 execute: async (args) => this._handleForget(args),
@@ -70,17 +76,25 @@ class ConsoleManager {
                 execute: async (args) => this._handleCombine(args),
                 category: 'craft'
             },
+            'makescrap': {
+                description: 'Makes scrap from junk weapons.',
+                execute: async (args) => this._handleScrap(args),
+                category: 'craft'
+            },
             
         };
 
         // Aliases for commands
         this.aliases = {
-            'h':    'help',
-            'q':    'quit',
-            'exit': 'quit',
-            's':    'status',
-            'inv':  'status'
-        }
+            'h':            'help',
+            'q':            'quit',
+            'exit':         'quit',
+            's':            'status',
+            'inv':          'status',
+            'scrap':        'makescrap',
+            'j':            'junk',
+            'scrappable':   'junk',
+        };
     }
 
     // --- INITIALIZATION ---
@@ -165,13 +179,26 @@ class ConsoleManager {
             console.log('');
         }
     }
+    
+    async _shutdown() {
+        console.log('[CLI] Shutting down...');
+        console.log('[CLI] Logging off from Steam...');
+        this.engine.logOff();
+        console.log('[CLI] CLI terminated.');
+        console.log("Goodbye!");
+        process.exit(0);
+    }
+
+    
+    _formatRow(name, count){
+        return ` ${name} `.padEnd(29, '.') + ` ${count}`;
+    }
 
     async _handleStatus(args) {
         const items = this.engine.getItemCount();
         const slots = this.engine.getSlots();
         const percent = Math.round((items / slots) * 100);
 
-        const formatRow = (name, count) => ` ${name} `.padEnd(26, '.') + ` ${count}`;
     
         console.log(' =====================================');
         console.log('   [STATUS] Inventory Overview');
@@ -185,10 +212,13 @@ class ConsoleManager {
         for (const [item, count] of Object.values(metalTally)) {
             if (count > 0) {
                 foundMetal = true;
-                console.log(formatRow(item.displayName, count));
+                console.log(this._formatRow(item.displayName, count));
             }
         }
-        if (!foundMetal) { console.log(formatRow('None', 0)); }
+        if (!foundMetal) { console.log(this._formatRow('None', 0)); }
+        console.log('');
+        
+        console.log( this._formatRow("Scrappable Weapons", this.engine.crafter.countJunk()) );
         console.log('');
         
         console.log('   --- Slot Tokens ---');
@@ -197,10 +227,10 @@ class ConsoleManager {
         for (const [item, count] of Object.values(slotTokenTally)) {
             if (count > 0) {
                 foundSlot = true;
-                console.log(formatRow(item.displayName, count));
+                console.log(this._formatRow(item.displayName, count));
             }
         }
-        if (!foundSlot) { console.log(formatRow('None', 0)); }
+        if (!foundSlot) { console.log(this._formatRow('None', 0)); }
         console.log('');
         
         console.log('   --- Class Tokens ---');
@@ -209,23 +239,20 @@ class ConsoleManager {
         for (const [item, count] of Object.values(classTokenTally)) {
             if (count > 0) {
                 foundClass = true;
-                console.log(formatRow(item.displayName, count));
+                console.log(this._formatRow(item.displayName, count));
             }
         }
-        if (!foundClass) { console.log(formatRow('None', 0)); }
+        if (!foundClass) { console.log(this._formatRow('None', 0)); }
         console.log('');
         
         console.log(' =====================================');
     }
 
-    
-    async _shutdown() {
-        console.log('[CLI] Shutting down...');
-        console.log('[CLI] Logging off from Steam...');
-        this.engine.logOff();
-        console.log('[CLI] CLI terminated.');
-        console.log("Goodbye!");
-        process.exit(0);
+    async _handleJunkSummary() {
+        const junkCounts = this.engine.crafter.getJunkSummary();
+        for (const junk of Object.values(junkCounts)) {
+            console.log(`  ${this._formatRow(junk.name, junk.count)}`);
+        }
     }
 
     async _handleForget() {
@@ -264,6 +291,10 @@ class ConsoleManager {
         console.log(`[Crafting] Attempting to combine ${targetMetal.fullName}...`);
         const res = await this.engine.crafter.combineMetal(targetMetal);
         return res; // idk
+    }
+
+    async _handleScrap() {
+        await this.engine.crafter.makeScrap();
     }
     
 }

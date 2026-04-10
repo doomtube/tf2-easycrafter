@@ -1,13 +1,29 @@
 
 const { LogLevel } = require('./constants.js');
-const { MetalType, SlotTokens, TFClasses } = require('./tf2Constants.js')
+
+const {
+    ProtectedWeapons,
+    
+    ItemQuality,
+    ItemOrigin,
+    UntradeableOrigins,
+    UncraftableOrigins,
+    ItemCraftType,
+    ItemEquipSlot,
+    
+    MetalType,
+    SlotTokens,
+    
+    TFClasses,
+} = require('./tf2Constants.js')
 
 // 10 seconds
 const TIMEOUT_MS = 10000
 
 class Crafter {
-    constructor(tf2Instance, logFunction) {
+    constructor(tf2Instance, itemSheet, logFunction) {
         this.tf2 = tf2Instance;
+        this.itemSheet = itemSheet;
         this._log = logFunction;
     }
 
@@ -24,6 +40,25 @@ class Crafter {
     getClassTokenTally() {
         const classTokens = Object.values(TFClasses).map((cls) => cls.token);
         return this._getCountsFor(classTokens, this.tf2.backpack); 
+    }
+
+    // Counts "scrappable" items
+    countJunk() {
+        return this._getJunkItems().length
+    }
+
+    getJunkSummary() {
+        const itemPool = this._getJunkItems();
+        const summary = {}
+        for (const item of itemPool) {
+            if (!summary[item.def_index]) {
+                summary[item.def_index] = {name: this.itemSheet[item.def_index]["item_name"], count: 1};
+            } else {
+                summary[item.def_index].count += 1;
+            }
+        }
+
+        return summary;
     }
 
     // --- Crafting Methods ---
@@ -74,11 +109,6 @@ class Crafter {
         }
         const itemsToSmelt = [myMetal[0].id];
 
-        /*
-        console.log(myMetal);
-        console.log(itemsToSmelt);
-        */
-        
         this._log(`Sending craft request to smelt ${metalType.name}...`);
         this.tf2.craft(itemsToSmelt);
         const success = await this._waitForCraft();
@@ -105,11 +135,6 @@ class Crafter {
             return false;
         }
         const itemsToSmelt = myMetal.slice(0, 3).map(metal => metal.id);
-
-        /*
-        console.log(myMetal);
-        console.log(itemsToSmelt);
-        */
                 
         this._log(`Sending craft request to combine ${metalType.name}...`);
         this.tf2.craft(itemsToSmelt);
@@ -122,26 +147,165 @@ class Crafter {
         return true;
     }
 
-    // useSniper and useMelee false by default since sniper melee best wep to craft objectors
-    async smeltJunk(useSniper = false, useMelee = false) {
-        // Search backpack filtered by isJunk with parameters specifying useSniper and useMelee
-        // item["craft_material_type"] == "weapon"
+    // Junk weapons to scrap (default excludes melees and snipers' because they are useful for crafting objectors)
+    async makeScrap(keepCleanSpare = true, useEquipped = false, excludeSlots = [ItemEquipSlot.MELEE], excludeClasses = [TFClasses.SNIPER]) {
+        const [target1, target2] = this._getBestJunkPair(keepCleanSpare, useEquipped, excludeSlots, excludeClasses);
+        this._log(`SMELT TARGETS:\n${this.itemSheet[target1.def_index].item_name}\n${this.itemSheet[target2.def_index].item_name}`, LogLevel.DEBUG);
+        
     }
 
     // ------ TOKENS ------
 
     async craftClassToken(tokenType) {
-        // Search backpack (filtered by isJunk (NOT IMPLEMENTED YET)) for which engine.itemSheet[item.def]:
-        //  is of the right craft_class (or allclass) (look at a specific item example to know what fields and values)
-
-        // maybe create filter backpack by weapon and class helper method
-        // itemSheet[item.def]["used_by_classes"] is null (KEY NO EXIST, NOT EMPTY LIST) for allclass (including spy)
-        //  or .includes tokenType.schemaClass
+        //TODO
     }
 
     async craftSlotToken(tokenType) {
-        // Search backpack (filtered by isJunk (NOT IMPLEMENTED YET)) for which
-        //  engine.itemSheet[item.def]["item_slot"] == tokenType.schemaSlot
+        //TODO
+    }
+
+    // ------ Filtering Helpers ------
+
+    _itemIsCraftable(item) {
+        if (UncraftableOrigins.has(item.origin)) { return false };
+
+        if (item.attribute && item.attribute.some(attr => attr.def_index === ItemAttribute.NEVER_CRAFTABLE)) {
+            return false;
+        }
+
+        return true; 
+    }
+
+    _itemIsTradeable(item) {
+        if (UntradeableOrigins.has(item.origin)) { return false };
+
+        if (item.attribute && item.attribute.some(attr => attr.def_index === ItemAttribute.CANNOT_TRADE)) {
+            return false;
+        }
+
+        return true;
+    }
+    
+    _itemIsEquipped(item) {
+        return (item.equipped_state && item.equipped_state.length > 0);
+    }
+
+    _itemIsWeapon(item) {
+        return (this.itemSheet[item.def_index]["craft_material_type"] == ItemCraftType.WEAPON);
+    }
+
+    // unused in junk check
+    _itemIsEquipSlot(equipSlot, item) {
+        return (this.itemSheet[item.def_index]["item_slot"] == equipSlot);
+    }
+
+    // unused in junk check
+    _itemBelongsToClass(tfClass, item) {
+        const usedClasses = this.itemSheet[item.def_index]["used_by_classes"];
+        // In the schema, null means allclass
+        return (usedClasses == null || usedClasses.includes(tfClass.token.schemaClass));
+    }
+
+    // Does NOT check for dupes!
+    _itemIsPossibleJunk(item, useEquipped, excludeSlots, excludeClasses) {
+
+        if ( ProtectedWeapons.has(item.def_index) ) { return false; } // Valuable uniques
+        if ( item.quality !== ItemQuality.UNIQUE ) { return false; }
+        if ( item.custom_name || item.custom_desc ) { return false; }
+        if ( item.attribute && item.attribute.length > 0 ) { return false; } // (Killstreaks, Spells, Parts, Festivizers)
+
+        if ( !useEquipped && this._itemIsEquipped(item) ) { return false; }
+        if ( excludeSlots && excludeSlots.includes(this.itemSheet[item.def_index]["item_slot"]) ) { return false; }
+
+        const usedClasses = this.itemSheet[item.def_index]["used_by_classes"];
+        const isAllClass = usedClasses == null;
+        // If any of the excluded classes are in the used classes, then it's not junk
+        if ( excludeClasses && !isAllClass && excludeClasses.some((cls) => usedClasses.includes(cls)) ) { return false; }
+        
+        return (
+            this._itemIsCraftable(item) &&
+            this._itemIsTradeable(item) &&
+            this._itemIsWeapon(item)
+        );
+    }
+    
+    // Filters backpack into just items that are able to be scrapped
+    _getJunkItems(keepCleanSpare, useEquipped, excludeSlots, excludeClasses) {
+    
+        const weapons = this.tf2.backpack.filter(item => this._itemIsWeapon(item));
+
+        // Group weapons by def index
+        // This will create seperate groups for decorated weapons, original festives, and other random things.
+        // Solution would be to map "weird" weapons to their original def. Not worth the time tbh.
+        const weaponGroups = {};
+        for (const weapon of weapons) {
+            const def = weapon.def_index;
+            
+            if (!weaponGroups[def]) { weaponGroups[def] = []; }
+            
+            weaponGroups[def].push(weapon);
+        }
+
+        // Whittle down the junk groups
+        const finalJunkPool = [];
+        for (const group of Object.values(weaponGroups)) {
+        
+            const originalCount = group.length;
+
+            // Only keep "clean" weapons in the junk pile
+            let junkableItems = group.filter( (item) =>
+                this._itemIsPossibleJunk(item, useEquipped, excludeSlots, excludeClasses)
+            );
+
+            // If items were not stripped from the group (or we always want to keep a clean spare),
+            //  strip one clean item from the junk group.
+            if (keepCleanSpare || junkableItems.length == originalCount) {
+                junkableItems.pop();
+            }
+
+            // Push each item onto the final junk pool
+            finalJunkPool.push(...junkableItems);
+        }
+
+        return finalJunkPool;
+        
+    }
+
+    // Used in junk pair algorithm
+    _getItemFlexibility(item) {
+        const usedClasses = this.itemSheet[item.def_index]["used_by_classes"];
+        // If it has specific classes, return that number. 
+        // If it's null (all-class), return 9 so it gets sorted to the very back
+        return usedClasses ? usedClasses.length : Object.keys(TFClasses).length;
+    }
+
+    // Gets the best pair of junk items to turn to scrap
+    _getBestJunkPair(keepCleanSpare = true, useEquipped = false, excludeSlots = [ItemEquipSlot.MELEE], excludeClasses = [TFClasses.SNIPER]) {
+    
+        const itemPool = this._getJunkItems(keepCleanSpare, useEquipped, excludeSlots, excludeClasses);
+
+        // Sort the pool with most restrictive weapons at the front (we want to use them before multiclass weps)
+        itemPool.sort((a, b) => this._getItemFlexibility(a) - this._getItemFlexibility(b));
+
+        const ALL_CLASSES = Object.values(TFClasses);
+
+        // N^2 Search to find a pair with matching classes
+        for (let i = 0; i < itemPool.length; i++) {
+            const item1 = itemPool[i];
+            let classes1 = this.itemSheet[item1.def_index]["used_by_classes"] || ALL_CLASSES;
+
+            for (let j = i + 1; j < itemPool.length; j++) {
+                const item2 = itemPool[j];
+                let classes2 = this.itemSheet[item2.def_index]["used_by_classes"] || ALL_CLASSES;
+
+                if (classes1.some( (cls) => classes2.includes(cls) )) {
+                    return [item1, item2]; 
+                }
+            }
+        }
+
+        // If the loops finish and find nothing, return null
+        return null; 
     }
 
     // ------ Craft Helpers ------

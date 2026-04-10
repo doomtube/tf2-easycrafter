@@ -43,13 +43,14 @@ class TF2Engine extends EventEmitter {
         this.user = new SteamUser({ dataDirectory: USER_DATA_DIR });
         this.tf2 = new TeamFortress2(this.user);
 
-        this.crafter = new Crafter(
-            this.tf2,
-            (msg, lvl) => this._log(msg, lvl) // arrow func to preserve the scope of "this"
-        )
-
         // ItemSheet initialization
         StaticSchema.forEach(item => { this.itemSheet[item.defindex] = item; });
+
+        this.crafter = new Crafter(
+            this.tf2,
+            this.itemSheet,
+            (msg, lvl) => this._log(msg, lvl) // arrow func to preserve the scope of "this"
+        )
         
         this._setupEventListeners();
 
@@ -145,6 +146,11 @@ class TF2Engine extends EventEmitter {
             if (firstLoad) {
                 firstLoad = false;
                 this._log(`Inventory loaded: ${this.tf2.backpack.length} items found.`);
+
+                // TEST FOR EXAMPLE OF ITEM OBJECT
+                this._log(JSON.stringify(this.tf2.backpack[0]), LogLevel.DEBUG);
+                this._log(JSON.stringify(this.itemSheet[this.tf2.backpack[0].def_index]), LogLevel.DEBUG);
+                
                 this.emit('ready');
             } else {
                 this._log("Inventory was just reloaded.");
@@ -173,7 +179,7 @@ class TF2Engine extends EventEmitter {
         });
 
         if (response == null) {
-            console.log("Auth cancelled. Exiting...");
+            this._log("Auth cancelled. Exiting...");
             process.exit(0);
         }
         
