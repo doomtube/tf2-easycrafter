@@ -1,5 +1,5 @@
-const readline = require('readline');
-const { MetalType, SlotTokens, TFClasses } = require('./tf2Constants.js');
+import readline from 'readline';
+import { MetalType, SlotTokens, TFClasses } from './tf2Constants.js';
 
 function parseMetal(target) {
     if (target) {
@@ -298,4 +298,4 @@ class ConsoleManager {
     
 }
 
-module.exports = ConsoleManager;
+export default ConsoleManager;

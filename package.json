@@ -4,7 +4,7 @@
   "description": "Easily craft common items quickly without launching the full game.",
   "license": "MIT",
   "author": "Jack Kibort",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "start": "npm run cli --",
     "cli": "node src/runCli.js"

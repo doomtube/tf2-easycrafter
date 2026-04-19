@@ -16,4 +16,4 @@ const LogColors = {
     RESET:              '\x1b[0m'
 };
 
-module.exports = { LogLevel, LogColors }
+export { LogLevel, LogColors };

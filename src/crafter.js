@@ -1,7 +1,6 @@
+import { LogLevel }  from './constants.js';
 
-const { LogLevel } = require('./constants.js');
-
-const {
+import {
     ProtectedWeapons,
     
     ItemQuality,
@@ -15,7 +14,7 @@ const {
     SlotTokens,
     
     TFClasses,
-} = require('./tf2Constants.js')
+} from './tf2Constants.js';
 
 // 10 seconds
 const TIMEOUT_MS = 10000
@@ -370,4 +369,4 @@ class Crafter {
 
 }
 
-module.exports = Crafter;
+export default Crafter;

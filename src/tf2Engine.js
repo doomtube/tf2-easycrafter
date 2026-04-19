@@ -1,13 +1,17 @@
-const fsPromises = require('fs').promises;
-const path = require('path');
-const EventEmitter = require('events');
+import { promises as fsPromises } from 'fs';
+import path from 'path';
+import EventEmitter from 'events';
 
-const SteamUser = require('steam-user');
-const TeamFortress2 = require('tf2');
-const StaticSchema = require('tf2-static-schema/static/items.json');
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const { LogLevel } = require('./constants.js');
-const Crafter = require('./crafter.js');
+import SteamUser from 'steam-user';
+import TeamFortress2 from 'tf2';
+import StaticSchema from 'tf2-static-schema/static/items.json' with { type: "json" };
+
+import { LogLevel } from './constants.js';
+import Crafter from './crafter.js';
 
 // Config
 const PROGRAM_NAME = "TF2-EasyCrafter"
@@ -256,4 +260,4 @@ class TF2Engine extends EventEmitter {
     
 }
 
-module.exports = TF2Engine;
+export default TF2Engine;

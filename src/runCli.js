@@ -1,10 +1,11 @@
-const prompts = require('prompts');
+import prompts from 'prompts';
 
-const { LogLevel, LogColors } = require('./constants.js');
-const TF2Engine = require('./tf2Engine.js');
-const ConsoleManager = require('./cli.js')
+import { LogLevel, LogColors } from './constants.js';
+import TF2Engine from './tf2Engine.js';
+import ConsoleManager from './cli.js';
 
-const { parseArgs } = require('node:util');
+// Arg parsing
+import { parseArgs } from 'node:util';
 const options = {
     help: { type: 'boolean', short: 'h'},
     forget: { type: 'boolean', short: 'f'},

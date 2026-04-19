@@ -192,7 +192,7 @@ Object.values(TFClasses).forEach( (tfClass) => {
 });
 Object.freeze(TFClasses);
 
-module.exports = {
+export {
     ProtectedWeapons,
     
     ItemQuality,
@@ -206,4 +206,4 @@ module.exports = {
     SlotTokens,
     
     TFClasses,
-}
+};
