@@ -87,7 +87,7 @@ class TF2Engine extends EventEmitter {
             this.clearRefreshToken();
         } else {
             // Try refreshToken
-            if (this._tryRefreshToken()) { return; }
+            if (await this._tryRefreshToken()) { return; }
         }
         
         // No token, prompt username/pass
@@ -95,7 +95,7 @@ class TF2Engine extends EventEmitter {
         this.user.logOn(creds);
     }
 
-    _tryRefreshToken() {
+    async _tryRefreshToken() {
 
         try {
             const fileContent = await fsPromises.readFile(TOKEN_PATH, 'utf8');
