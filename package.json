@@ -1,12 +1,12 @@
 {
   "name": "tf2-easycrafter",
   "version": "0.1.0",
-  "description": "Making my own crafting interface because TF2's is just so clunky",
+  "description": "Easily craft common items quickly without launching the full game.",
   "license": "MIT",
   "author": "Jack Kibort",
   "type": "commonjs",
   "scripts": {
-    "start": "npm run cli",
+    "start": "npm run cli --",
     "cli": "node src/runCli.js"
   },
   "dependencies": {

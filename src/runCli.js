@@ -1,10 +1,31 @@
-
 const prompts = require('prompts');
 
 const { LogLevel, LogColors } = require('./constants.js');
 const TF2Engine = require('./tf2Engine.js');
 const ConsoleManager = require('./cli.js')
 
+const { parseArgs } = require('node:util');
+const options = {
+    help: { type: 'boolean', short: 'h'},
+    forget: { type: 'boolean', short: 'f'},
+    forgetme: { type: 'boolean' },
+};
+const { values: argVals } = parseArgs({ options });
+
+function displayHelp() {
+    console.log(`
+Usage: npm run start -- [options]
+
+Options:
+    -f, --forget    Clear the login token before running
+    -h, --help      Show this help message
+
+Examples:
+    npm run start -- --forget
+    npm run start -- -h
+`
+    );
+}
 
 function setupListeners(engine) {
     engine.on('log', ({ message, level, timestamp }) => {
@@ -39,12 +60,17 @@ function setupListeners(engine) {
 }
 
 async function runCli() {
+
+    // Handle flags
+    if (argVals.help) { displayHelp(); return; }
+    const shouldForget = argVals.forget || argVals.forgetme
+
     const engine = new TF2Engine();
     
     setupListeners(engine)
     const readyPromise = new Promise(res => engine.once('ready', res));
     
-    await engine.start();
+    await engine.start(shouldForget);
     await readyPromise;
     
     console.log("Initialization complete. Starting CLI...");

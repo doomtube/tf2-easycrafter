@@ -32,8 +32,22 @@ class TF2Engine extends EventEmitter {
     getItemCount() { return this.tf2.backpack.length; }
     getSlots() { return this.tf2.backpackSlots; }
 
+    // Forget auth details
+    async clearRefreshToken() {
+        if (fs.existsSync(TOKEN_PATH)) {
+            try {
+                fs.unlinkSync(TOKEN_PATH);
+                this._log("Saved login token cleared.");
+            } catch (err) {
+                this._log(`Failed to clear token: ${err.message}`, LogLevel.ERROR);
+            }
+        } else {
+            this._log("No saved token to clear.", LogLevel.DEBUG);
+        }
+    }
+    
     // Initialization
-    async start() {
+    async start(forget=false) {
         
         this._log("Initializing...");
     
@@ -56,24 +70,25 @@ class TF2Engine extends EventEmitter {
 
         
         this._log("Initiating Logon...");
-        await this._logon();
+        await this._logon(forget);
     }
 
     async logOff() {
-        
-        // TODO: idk how to properly log off
+        // TODO: properly log off
         this._log("Logging off from Steam (ungracefully)...");
-        
     }
 
-    async _logon() {
-        // Try refreshToken
-        if (this._tryRefreshToken()) { return; }
+    async _logon(forget=false) {
+        if (forget) {
+            this.clearRefreshToken();
+        } else {
+            // Try refreshToken
+            if (this._tryRefreshToken()) { return; }
+        }
         
         // No token, prompt username/pass
         const creds = await this._requestCredentials();
         this.user.logOn(creds);
-        
     }
 
     _tryRefreshToken() {

@@ -20,8 +20,6 @@ function parseMetal(target) {
     return targetMetal;
 }
 
-// TODO: Make command to clear login token
-
 class ConsoleManager {
     constructor(tf2Engine) {
         this.engine = tf2Engine;
@@ -94,6 +92,7 @@ class ConsoleManager {
             'scrap':        'makescrap',
             'j':            'junk',
             'scrappable':   'junk',
+            'forget':       'forgetme',
         };
     }
 
@@ -256,7 +255,7 @@ class ConsoleManager {
     }
 
     async _handleForget() {
-        // TODO: function to delete login token (put it in the tf2engine)
+        await this.engine.clearRefreshToken();
     }
 
     async _handleSmelt(args) {
