@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fsPromises = require('fs').promises;
 const path = require('path');
 const EventEmitter = require('events');
 
@@ -34,15 +34,15 @@ class TF2Engine extends EventEmitter {
 
     // Forget auth details
     async clearRefreshToken() {
-        if (fs.existsSync(TOKEN_PATH)) {
-            try {
-                fs.unlinkSync(TOKEN_PATH);
-                this._log("Saved login token cleared.");
-            } catch (err) {
-                this._log(`Failed to clear token: ${err.message}`, LogLevel.ERROR);
+        try {
+            await fsPromises.unlink(TOKEN_PATH);
+            this._log("Saved login token cleared.");
+        } catch (err) {
+            if (err?.code === 'ENOENT') {
+                this._log("No saved token found to clear.", LogLevel.DEBUG);
+            } else {
+                this._log(`Failed to clear token: ${err?.message || "Unknown error"}`, LogLevel.ERROR);
             }
-        } else {
-            this._log("No saved token to clear.", LogLevel.DEBUG);
         }
     }
     
@@ -52,7 +52,11 @@ class TF2Engine extends EventEmitter {
         this._log("Initializing...");
     
         // Directory initialization
-        if (!fs.existsSync(DATA_DIR)) { fs.mkdirSync(DATA_DIR, { recursive: true }); }
+        try {
+            await fsPromises.mkdir(DATA_DIR, { recursive: true });
+        } catch (err) {
+            this._log(`Failed to create data directory: ${err?.message || "Unknown error"}`, LogLevel.ERROR);
+        }
         
         this.user = new SteamUser({ dataDirectory: USER_DATA_DIR });
         this.tf2 = new TeamFortress2(this.user);
@@ -92,12 +96,9 @@ class TF2Engine extends EventEmitter {
     }
 
     _tryRefreshToken() {
-        if (!fs.existsSync(TOKEN_PATH)) {
-            return false;
-        }
-        
+
         try {
-            const fileContent = fs.readFileSync(TOKEN_PATH, 'utf8');
+            const fileContent = await fsPromises.readFile(TOKEN_PATH, 'utf8');
             const sessionData = JSON.parse(fileContent);
 
             if (sessionData.token) {
@@ -108,10 +109,11 @@ class TF2Engine extends EventEmitter {
                 });
                 return true;
             }
-            
         } catch (err) {
-            this._log("An error occured while reading saved token. Ignoring token...", LogLevel.WARN);
-            this._log(err.message, LogLevel.ERROR);
+            if (err?.code !== 'ENOENT') {
+                this._log("An error occured while reading saved token. Ignoring token...", LogLevel.WARN);
+                this._log(err?.message || "Unknown error", LogLevel.ERROR);
+            }
         }
         
         return false;
@@ -217,15 +219,19 @@ class TF2Engine extends EventEmitter {
             account: this.user.steamID ? this.user.steamID.getSteamID64() : 'unknown'
         };
         
-        fs.writeFileSync(TOKEN_PATH, JSON.stringify(data, null, 4), 'utf8');
+        try {
+            await fsPromises.writeFile(TOKEN_PATH, JSON.stringify(data, null, 4), 'utf8');
+        } catch (err) {
+            this._log(`Failed to save token: ${err?.message || "Unknown error"}`, LogLevel.ERROR);
+        }
     }
 
     async _handleUserInitError(err) {
-        this._log(`Steam Login Error: ${err.message}`);
+        this._log(`Steam Login Error: ${err?.message || "Unknown error"}`, LogLevel.ERROR);
         
-        if (err.eresult === SteamUser.EResult.InvalidPassword) {
+        if (err?.eresult === SteamUser.EResult.InvalidPassword) {
             this._log("Session invalid. Deleting saved token...");
-            if (fs.existsSync(TOKEN_PATH)) fs.unlinkSync(TOKEN_PATH);
+            await this.clearRefreshToken();
             await this._logon() // Retry login
         } else {
             // Fatal?

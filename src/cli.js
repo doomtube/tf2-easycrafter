@@ -125,7 +125,7 @@ class ConsoleManager {
                 try {
                     await command.execute(args);
                 } catch (err) {
-                    console.error(`Error executing '${commandName}':`, err);
+                    console.error(`Error executing '${commandName}': ${err?.message || "Unknown error"}`);
                 }
             } else {
                 console.log(`Unknown command: '${commandName}'. Type 'help' for a list of commands.`);

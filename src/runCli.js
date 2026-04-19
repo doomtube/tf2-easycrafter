@@ -78,4 +78,7 @@ async function runCli() {
     await cli.start();
 }
 
-runCli();
+runCli().catch(err => {
+    console.error(`Fatal Initialization Error: ${err?.message || "Unknown error"}`);
+    process.exit(1);
+});
