@@ -20,6 +20,13 @@ const {
 // 10 seconds
 const TIMEOUT_MS = 10000
 
+const DefaultJunkConfig = {
+    keepCleanSpare: true, // Don't junk last clean item
+    useEquipped: false, // Don't junk equipped items
+    excludeSlots: [ItemEquipSlot.MELEE], // Exclude sniper items
+    excludeClasses: [TFClasses.SNIPER] // Exclude melee items
+};
+
 class Crafter {
     constructor(tf2Instance, itemSheet, logFunction) {
         this.tf2 = tf2Instance;
@@ -148,8 +155,8 @@ class Crafter {
     }
 
     // Junk weapons to scrap (default excludes melees and snipers' because they are useful for crafting objectors)
-    async makeScrap(keepCleanSpare = true, useEquipped = false, excludeSlots = [ItemEquipSlot.MELEE], excludeClasses = [TFClasses.SNIPER]) {
-        const [target1, target2] = this._getBestJunkPair(keepCleanSpare, useEquipped, excludeSlots, excludeClasses);
+    async makeScrap(config = DefaultJunkConfig) {
+        const [target1, target2] = this._getBestJunkPair(config);
         this._log(`SMELT TARGETS:\n${this.itemSheet[target1.def_index].item_name}\n${this.itemSheet[target2.def_index].item_name}`, LogLevel.INFO);
         // TODO: Possibly make it confirm with the user before starting the craft
     }
@@ -207,20 +214,20 @@ class Crafter {
     }
 
     // Does NOT check for dupes!
-    _itemIsPossibleJunk(item, useEquipped, excludeSlots, excludeClasses) {
+    _itemIsPossibleJunk(item, config = DefaultJunkConfig) {
 
         if ( ProtectedWeapons.has(item.def_index) ) { return false; } // Valuable uniques
         if ( item.quality !== ItemQuality.UNIQUE ) { return false; }
         if ( item.custom_name || item.custom_desc ) { return false; }
         if ( item.attribute && item.attribute.length > 0 ) { return false; } // (Killstreaks, Spells, Parts, Festivizers)
 
-        if ( !useEquipped && this._itemIsEquipped(item) ) { return false; }
-        if ( excludeSlots && excludeSlots.includes(this.itemSheet[item.def_index]["item_slot"]) ) { return false; }
+        if ( !config.useEquipped && this._itemIsEquipped(item) ) { return false; }
+        if ( config.excludeSlots && config.excludeSlots.includes(this.itemSheet[item.def_index]["item_slot"]) ) { return false; }
 
         const usedClasses = this.itemSheet[item.def_index]["used_by_classes"];
         const isAllClass = usedClasses == null;
         // If any of the excluded classes are in the used classes, then it's not junk
-        if ( excludeClasses && !isAllClass && excludeClasses.some((cls) => usedClasses.includes(cls)) ) { return false; }
+        if ( config.excludeClasses && !isAllClass && config.excludeClasses.some((cls) => usedClasses.includes(cls.token.schemaClass)) ) { return false; }
         
         return (
             this._itemIsCraftable(item) &&
@@ -230,7 +237,8 @@ class Crafter {
     }
     
     // Filters backpack into just items that are able to be scrapped
-    _getJunkItems(keepCleanSpare, useEquipped, excludeSlots, excludeClasses) {
+    
+    _getJunkItems(config = DefaultJunkConfig) {
     
         const weapons = this.tf2.backpack.filter(item => this._itemIsWeapon(item));
 
@@ -254,12 +262,12 @@ class Crafter {
 
             // Only keep "clean" weapons in the junk pile
             let junkableItems = group.filter( (item) =>
-                this._itemIsPossibleJunk(item, useEquipped, excludeSlots, excludeClasses)
+                this._itemIsPossibleJunk(item, config)
             );
 
             // If items were not stripped from the group (or we always want to keep a clean spare),
             //  strip one clean item from the junk group.
-            if (keepCleanSpare || junkableItems.length == originalCount) {
+            if (config.keepCleanSpare || junkableItems.length == originalCount) {
                 junkableItems.pop();
             }
 
@@ -280,9 +288,9 @@ class Crafter {
     }
 
     // Gets the best pair of junk items to turn to scrap
-    _getBestJunkPair(keepCleanSpare = true, useEquipped = false, excludeSlots = [ItemEquipSlot.MELEE], excludeClasses = [TFClasses.SNIPER]) {
+    _getBestJunkPair(config = DefaultJunkConfig) {
     
-        const itemPool = this._getJunkItems(keepCleanSpare, useEquipped, excludeSlots, excludeClasses);
+        const itemPool = this._getJunkItems(config);
 
         // Sort the pool with most restrictive weapons at the front (we want to use them before multiclass weps)
         itemPool.sort((a, b) => this._getItemFlexibility(a) - this._getItemFlexibility(b));
