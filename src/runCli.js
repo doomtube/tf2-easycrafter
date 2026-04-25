@@ -28,15 +28,7 @@ Examples:
     );
 }
 
-function setupListeners(engine) {
-    engine.on('log', ({ message, level, timestamp }) => {
-        // Format: HH:MM:SS
-        const time = new Date(timestamp).toLocaleTimeString('en-GB', { hour12: false });
-        const displayLevel = level.toUpperCase().padEnd(5)
-        const color = LogColors[level] || LogColors.reset;
-        console.log(`${LogColors.DIM}[${time}]:${LogColors.RESET} ${color}${displayLevel}${LogColors.RESET} ${LogColors.DIM}|${LogColors.RESET} ${message}`);
-    });
-    
+function setupListeners(engine) {    
     engine.on('inputRequired', async (data) => {
         const response = await prompts({
             type: 'text',
@@ -67,15 +59,17 @@ async function runCli() {
     const shouldForget = argVals.forget || argVals.forgetme
 
     const engine = new TF2Engine();
-    
+    const cli = new ConsoleManager(engine);
+
+    // Setup engine
     setupListeners(engine)
     const readyPromise = new Promise(res => engine.once('ready', res));
     
     await engine.start(shouldForget);
     await readyPromise;
-    
+
+    // Start CLI
     console.log("Initialization complete. Starting CLI...");
-    const cli = new ConsoleManager(engine);
     await cli.start();
 }
 

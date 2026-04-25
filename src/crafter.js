@@ -343,13 +343,9 @@ class Crafter {
     _waitForCraft(timeoutMs = TIMEOUT_MS) {
         return new Promise((resolve) => {
         
-            const timeout = setTimeout(() => {
-                this._log("Crafting request timed out. The Game Coordinator might be down.", LogLevel.WARN);
-                this.tf2.removeAllListeners('craftingComplete');
-                resolve(false);
-            }, timeoutMs);
-
-            this.tf2.once('craftingComplete', (recipe, itemsGained) => {
+            let timeout;
+            
+            const listener = (recipe, itemsGained) => {
                 clearTimeout(timeout);
                 if (recipe < 0) {
                     this._log(`Craft Failed (recipe ${recipe}, gained ${itemsGained.length} items).`, LogLevel.WARN);
@@ -358,7 +354,15 @@ class Crafter {
                     this._log(`Craft successful! Gained ${itemsGained.length} items using recipe ${recipe}.`, LogLevel.DONE);
                     resolve(true);
                 }
-            });
+            };
+        
+            timeout = setTimeout(() => {
+                this._log("Crafting request timed out. The Game Coordinator might be down.", LogLevel.WARN);
+                this.tf2.removeListener('craftingComplete', listener);
+                resolve(false);
+            }, timeoutMs);
+
+            this.tf2.once('craftingComplete', listener);
         })
     }
 

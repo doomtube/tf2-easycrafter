@@ -23,7 +23,10 @@ function parseMetal(target) {
 
 class ConsoleManager {
     constructor(tf2Engine) {
+        this.isActive = false;
+    
         this.engine = tf2Engine;
+        this.engine.on('log', (data) => this._handleLog(data));
         
         this.rl = readline.createInterface({
             input: process.stdin,
@@ -153,11 +156,31 @@ class ConsoleManager {
         await this.commands['status'].execute();
         console.log("  Type 'help' for a list of commands.\n");
 
+        // Protect user prompts now
+        this.isActive = true;
         // Initial prompt
         this.rl.prompt();
     }
 
     // --- HELPERS ---
+    
+    _handleLog({ message, level, timestamp }) {
+        const time = new Date(timestamp).toLocaleTimeString('en-GB', { hour12: false });
+        const displayLevel = level.toUpperCase().padEnd(5);
+        const color = LogColors[level] || LogColors.reset;
+        const formattedMessage = `${LogColors.DIM}[${time}]:${LogColors.RESET} ${color}${displayLevel}${LogColors.RESET} ${LogColors.DIM}|${LogColors.RESET} ${message}`;
+
+        if (this.isActive) {
+            // Clear the current prompt line, print the log, then redraw the prompt
+            readline.clearLine(process.stdout, 0);
+            readline.cursorTo(process.stdout, 0);
+            console.log(formattedMessage);
+            this.rl.prompt(true); // true keeps the user's current input intact
+        } else {
+            console.log(formattedMessage);
+        }
+    }
+    
     _askQuestion(query) {
         return new Promise(resolve => this.rl.question(query, resolve));
     }
