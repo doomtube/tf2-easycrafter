@@ -182,7 +182,15 @@ class ConsoleManager {
     }
     
     _askQuestion(query) {
-        return new Promise(resolve => this.rl.question(query, resolve));
+        return new Promise(resolve => {
+            this.rl.question(query, (answer) => {
+                // Remove the answer from the history array so it doesn't clutter
+                if (this.rl.history && this.rl.history[0] === answer) {
+                    this.rl.history.shift();
+                }
+                resolve(answer);
+            });
+        });
     }
 
     // --- COMMAND HANDLERS ---
