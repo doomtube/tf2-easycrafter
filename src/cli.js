@@ -38,7 +38,7 @@ class ConsoleManager {
                 execute: async (args) => this._handleHelp(args),
                 category: 'cmd'
             },
-            'exit': {
+            'quit': {
                 description: 'Logs off and closes the bot.',
                 execute: async (args) => this._shutdown(args),
                 category: 'cmd'
