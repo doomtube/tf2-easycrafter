@@ -154,10 +154,32 @@ class Crafter {
     }
 
     // Junk weapons to scrap (default excludes melees and snipers' because they are useful for crafting objectors)
-    async makeScrap(config = DefaultJunkConfig) {
-        const [target1, target2] = this._getBestJunkPair(config);
-        this._log(`SMELT TARGETS:\n${this.itemSheet[target1.def_index].item_name}\n${this.itemSheet[target2.def_index].item_name}`, LogLevel.INFO);
-        // TODO: Possibly make it confirm with the user before starting the craft
+    async makeScrap(confirmCallback, config = DefaultJunkConfig) {
+        const pair = this._getBestJunkPair(config);
+                
+        if (!pair) {
+            this._log("No valid scrappable weapons found.", LogLevel.INFO);
+            return false;
+        }
+        
+        const [target1, target2] = pair;
+        this._log(`SMELT TARGETS: `, LogLevel.INFO);
+        this._log(`- ${this.itemSheet[target1.def_index].item_name}`, LogLevel.INFO);
+        this._log(`- ${this.itemSheet[target2.def_index].item_name}`, LogLevel.INFO);
+        
+        // Await the user's decision
+        if (confirmCallback) {
+            const proceed = await confirmCallback();
+            if (!proceed) {
+                this._log("Craft cancelled.", LogLevel.INFO);
+                return false;
+            }
+        }
+
+        // Execute craft
+        this._log("Sending craft request...");
+        this.tf2.craft([target1.id, target2.id]);
+        return await this._waitForCraft();
     }
 
     // ------ TOKENS ------

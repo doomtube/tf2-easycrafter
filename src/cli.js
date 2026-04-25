@@ -1,5 +1,6 @@
 import readline from 'readline';
 import { MetalType, SlotTokens, TFClasses } from './tf2Constants.js';
+import { LogLevel, LogColors } from './constants.js';
 
 function parseMetal(target) {
     if (target) {
@@ -156,6 +157,11 @@ class ConsoleManager {
         this.rl.prompt();
     }
 
+    // --- HELPERS ---
+    _askQuestion(query) {
+        return new Promise(resolve => this.rl.question(query, resolve));
+    }
+
     // --- COMMAND HANDLERS ---
     
     async _handleHelp(args) {
@@ -292,8 +298,14 @@ class ConsoleManager {
         return res; // idk
     }
 
-    async _handleScrap() {
-        await this.engine.crafter.makeScrap();
+    async _handleScrap(args) {
+        // TODO: -y option to bypass prompt
+        const confirmCb = async () => {
+            const answer = await this._askQuestion("Are you sure you want to smelt these? (y/N): ");
+            return answer.trim().toLowerCase() === 'y';
+        };
+
+        await this.engine.crafter.makeScrap(confirmCb);
     }
     
 }
